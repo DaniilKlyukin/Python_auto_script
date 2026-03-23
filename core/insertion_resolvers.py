@@ -1,4 +1,4 @@
-from WordDocumentEditor import WordDocumentEditor
+from word_editor import WordDocumentEditor
 
 from typing import Optional
 

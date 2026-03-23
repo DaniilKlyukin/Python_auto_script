@@ -1,7 +1,7 @@
-from ScanInsertRules import first_page_resolver, second_page_resolver, coordination_page_resolver
-from ScanInsertRule import ScanInsertRule
-from ScanFinder import ScanFinder
-from ScanInsertionManager import ScanInsertionManager
+from insertion_resolvers import first_page_resolver, second_page_resolver, coordination_page_resolver
+from insertion_rule import ScanInsertRule
+from scan_finder import ScanFinder
+from insertion_manager import ScanInsertionManager
 
 from os import path, listdir
 from os.path import join

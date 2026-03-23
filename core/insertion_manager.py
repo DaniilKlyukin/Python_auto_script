@@ -1,6 +1,6 @@
-from ScanFinder import ScanFinder
-from ScanInsertRule import ScanInsertRule
-from WordDocumentEditor import WordDocumentEditor
+from scan_finder import ScanFinder
+from insertion_rule import ScanInsertRule
+from word_editor import WordDocumentEditor
 
 from typing import List, Optional
 from pathlib import Path
