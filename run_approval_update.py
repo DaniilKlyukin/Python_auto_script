@@ -14,8 +14,8 @@ def main():
         return
 
     try:
-        start_y = int(input("Введите начальный год (напр. 2024): "))
-        end_y = int(input("Введите конечный год (напр. 2028): "))
+        start_y = int(input("Введите начальный год: "))
+        end_y = int(input("Введите конечный год: "))
     except ValueError:
         print("Ошибка: Введите числа.")
         return
