@@ -5,6 +5,7 @@ from contextlib import contextmanager
 import comtypes.client
 from pypdf import PdfReader, PdfWriter
 
+
 @contextmanager
 def word_application():
     word = None

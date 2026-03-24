@@ -6,6 +6,7 @@ from docx.shared import Mm
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
+
 class DocxEditor:
     def __init__(self, file_path: str):
         self.file_path = file_path
