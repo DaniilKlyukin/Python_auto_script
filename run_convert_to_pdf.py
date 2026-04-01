@@ -1,39 +1,49 @@
 import os
-import logging
 from utils.pdf_generator import PDFGenerator
-
-logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def main():
-    print("=== Конвертация .docx в .pdf (через MS Word) ===")
-    path = input("Введите путь к папке с .docx: ").strip().strip('"')
+    print("=== Конвертация DOCX и PPTX в PDF ===")
+    path = input("Введите путь к папке: ").strip().strip('"')
 
     if not os.path.isdir(path):
         print("Путь не найден.")
         return
 
-    files = [f for f in os.listdir(path) if f.lower().endswith('.docx') and not f.startswith('~$')]
+    files = [f for f in os.listdir(path) if not f.startswith('~$')]
+    docx_files = [f for f in files if f.lower().endswith('.docx')]
+    pptx_files = [f for f in files if f.lower().endswith('.pptx')]
 
-    if not files:
-        print("Файлы .docx не найдены.")
+    if not docx_files and not pptx_files:
+        print("Подходящие файлы не найдены.")
         return
 
-    print(f"Найдено файлов: {len(files)}. Начинаю конвертацию...")
+    print(f"Найдено: DOCX - {len(docx_files)}, PPTX - {len(pptx_files)}")
 
     generator = PDFGenerator()
     success_count = 0
 
-    for filename in files:
-        docx_path = os.path.join(path, filename)
-        # Создаем PDF в той же папке
-        if generator.convert(docx_path):
-            print(f"[OK] {filename} -> PDF")
-            success_count += 1
-        else:
-            print(f"[FAIL] {filename}")
+    try:
+        for filename in docx_files:
+            full_path = os.path.join(path, filename)
+            if generator.convert_docx(full_path):
+                print(f"[OK] {filename} -> PDF")
+                success_count += 1
+            else:
+                print(f"[FAIL] {filename}")
 
-    print(f"\n[Готово] Успешно сконвертировано: {success_count} из {len(files)}")
+        for filename in pptx_files:
+            full_path = os.path.join(path, filename)
+            if generator.convert_pptx(full_path):
+                print(f"[OK] {filename} -> PDF")
+                success_count += 1
+            else:
+                print(f"[FAIL] {filename}")
+    finally:
+        generator.quit()
+
+    total = len(docx_files) + len(pptx_files)
+    print(f"\n[Готово] Успешно: {success_count} из {total}")
 
 
 if __name__ == "__main__":
