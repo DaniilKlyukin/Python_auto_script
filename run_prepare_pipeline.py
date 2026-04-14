@@ -9,6 +9,7 @@ from utils.file_cleaner import FileCleaner
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+
 def main():
     folder_path = input("Введите путь к папке: ").strip().strip('"')
     if not os.path.isdir(folder_path):
@@ -24,6 +25,9 @@ def main():
 
     old_fio = input("Введите ФИО, которое нужно заменить (подписи): ").strip()
     new_fio = input("Введите новое ФИО: ").strip()
+
+    old_title = input("Введите старую должность для замены (напр. Заведующий кафедрой): ").strip()
+    new_title = input("Введите новую должность (напр. И.о. заведующего кафедрой): ").strip()
 
     print("\n[1/6] Очистка папки от PDF и изображений...")
     deleted_count = FileCleaner.cleanup_folder(folder_path)
@@ -43,15 +47,20 @@ def main():
     for filename in docx_files:
         process_docx(os.path.join(folder_path, filename), years_list)
 
-    print("\n[5/6] Замена ФИО в зонах подписей...")
+    print("\n[5/6] Замена ФИО и Должностей в зонах подписей...")
     for filename in docx_files:
-        process_docx_signatures(os.path.join(folder_path, filename), old_fio, new_fio)
+        process_docx_signatures(
+            os.path.join(folder_path, filename),
+            old_fio, new_fio,
+            old_title, new_title
+        )
 
     print("\n[6/6] Очистка имен файлов...")
     fn_cleaner = FilenameCleaner(folder_path)
     fn_cleaner.run()
 
     print("\n=== Все операции успешно завершены ===")
+
 
 if __name__ == "__main__":
     main()

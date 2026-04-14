@@ -3,7 +3,7 @@ from services.signature_processor import process_docx_signatures
 
 
 def main():
-    print("=== Утилита замены ФИО в зонах подписей (РПД) — Рекурсивный поиск ===")
+    print("=== Утилита замены ФИО и Должности в зонах подписей — Рекурсивный поиск ===")
 
     dir_path = input("Введите путь к папке с файлами .docx: ").strip().strip('"')
     if not os.path.isdir(dir_path):
@@ -12,6 +12,9 @@ def main():
 
     old_fio = input("Введите ФИО, которое нужно заменить: ").strip()
     new_fio = input("Введите новое ФИО: ").strip()
+
+    old_title = input("Введите старую должность (или оставьте пустым): ").strip()
+    new_title = input("Введите новую должность (или оставьте пустым): ").strip()
 
     if not old_fio or not new_fio:
         print("Ошибка: ФИО не могут быть пустыми.")
@@ -26,14 +29,16 @@ def main():
 
                 rel_path = os.path.relpath(full_path, dir_path)
 
-                success, message = process_docx_signatures(full_path, old_fio, new_fio)
+                success, message = process_docx_signatures(
+                    full_path, old_fio, new_fio, old_title, new_title
+                )
 
                 if success:
                     print(f"[OK] {rel_path}")
                     stats["ok"] += 1
                 else:
-                    if "не найдено" in message:
-                        print(f"[SKIP] {rel_path} (ФИО не обнаружено)")
+                    if "не найдены" in message:
+                        print(f"[SKIP] {rel_path} (Данные не обнаружены)")
                         stats["skip"] += 1
                     else:
                         print(f"[ERR] {rel_path}: {message}")

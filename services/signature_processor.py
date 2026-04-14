@@ -22,6 +22,20 @@ def create_name_regex(name_str):
     return re.compile(f"({pattern1}|{pattern2})", re.IGNORECASE)
 
 
+def create_title_regex(title_str):
+    """Создает гибкое регулярное выражение для должности (учитывает сокращения)"""
+    if not title_str:
+        return None
+    # Экранируем спецсимволы
+    pattern = re.escape(title_str)
+    # Позволяем слову 'заведующий' сокращаться до 'зав.'
+    pattern = pattern.replace(r'заведующий', r'зав(едующий)?\.?')
+    pattern = pattern.replace(r'Заведующий', r'[Зз]ав(едующий)?\.?')
+    # Заменяем пробелы на возможность нескольких пробелов/переносов
+    pattern = pattern.replace(r'\ ', r'\s+')
+    return re.compile(pattern, re.IGNORECASE)
+
+
 def is_signature_zone(paragraph, cell_context=False):
     text = paragraph.text.strip()
     if not text:
@@ -44,22 +58,38 @@ def is_signature_zone(paragraph, cell_context=False):
     return has_indicator or has_keyword
 
 
-def process_docx_signatures(file_path, old_name, new_name):
+def process_docx_signatures(file_path, old_name, new_name, old_title=None, new_title=None):
     try:
         doc = Document(file_path)
         name_regex = create_name_regex(old_name)
+        title_regex = create_title_regex(old_title) if old_title else None
         is_changed = False
 
         def replace_in_paragraph(paragraph, is_cell=False):
             nonlocal is_changed
-            if name_regex.search(paragraph.text):
+            # Проверяем, есть ли в параграфе ФИО или должность
+            has_name = name_regex.search(paragraph.text)
+            has_title = title_regex.search(paragraph.text) if title_regex else False
+
+            if has_name or has_title:
                 if is_signature_zone(paragraph, is_cell):
                     full_text = paragraph.text
-                    new_text = name_regex.sub(new_name, full_text)
-                    if new_text != full_text:
+
+                    # Сначала меняем должность, потом ФИО
+                    if has_title and new_title:
+                        full_text = title_regex.sub(new_title, full_text)
+
+                    if has_name:
+                        full_text = name_regex.sub(new_name, full_text)
+
+                    if full_text != paragraph.text:
+                        # Очищаем раны и записываем обновленный текст в первый ран
                         for i in range(len(paragraph.runs)):
                             paragraph.runs[i].text = ""
-                        paragraph.runs[0].text = new_text
+                        if paragraph.runs:
+                            paragraph.runs[0].text = full_text
+                        else:
+                            paragraph.add_run(full_text)
                         is_changed = True
 
         for para in doc.paragraphs:
@@ -75,7 +105,7 @@ def process_docx_signatures(file_path, old_name, new_name):
             doc.save(file_path)
             return True, "Успешно обновлено"
         else:
-            return False, "ФИО не найдено в подходящих блоках"
+            return False, "Данные не найдены в подходящих блоках"
 
     except Exception as e:
         return False, str(e)
